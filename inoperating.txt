@@ -1,0 +1,110 @@
+#include <iostream>
+#include <vector>
+#include <string>
+#include <sstream>
+#include <set>
+#include <algorithm>
+
+using namespace std;
+
+// DFS to find all cycles starting from a node
+void dfs(int node, int start, vector<int>& path, vector<bool>& visited, const vector<vector<int>>& adj, vector<vector<int>>& cycles) {
+    visited[node] = true;
+    path.push_back(node);
+
+    for (int next : adj[node]) {
+        if (next == start && path.size() >= 2) { // Found a cycle
+            cycles.push_back(path);
+        }
+        else if (!visited[next]) {
+            dfs(next, start, path, visited, adj, cycles);
+        }
+    }
+
+    visited[node] = false;
+    path.pop_back();
+}
+
+int main() {
+    ios_base::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    int T;
+    cin >> T;
+    cin.ignore(); // Consume newline
+    cin.ignore(); // Consume blank line
+
+    for (int t = 1; t <= T; ++t) {
+        int N, M, E;
+        cin >> N >> M >> E;
+        cin.ignore(); // Consume newline
+
+        // Initialize adjacency list (0 to N-1 for processes, N to N+M-1 for resources)
+        int total_nodes = N + M;
+        vector<vector<int>> adj(total_nodes);
+        string line;
+        int edges_read = 0;
+        while (edges_read < E && getline(cin, line)) {
+            if (line.empty()) continue; // Skip empty lines within edge input
+            istringstream iss(line);
+            string edge;
+            while (iss >> edge && edges_read < E) {
+                char u = edge[0], v = edge[2];
+                int u_idx = (u >= 'A' && u <= 'Z') ? (u - 'A') : (N + (u - 'a'));
+                int v_idx = (v >= 'A' && v <= 'Z') ? (v - 'A') : (N + (v - 'a'));
+                adj[u_idx].push_back(v_idx);
+                ++edges_read;
+            }
+        }
+
+        // Find all cycles starting from each process node
+        vector<vector<int>> cycles;
+        vector<bool> visited(total_nodes, false);
+        vector<int> path;
+        for (int i = 0; i < N; ++i) { // Start DFS from each process
+            dfs(i, i, path, visited, adj, cycles);
+        }
+
+        // Process cycles, removing duplicates up to rotation
+        set<string> unique_cycle_strings;
+        for (const auto& cycle : cycles) {
+            string s;
+            for (int node : cycle) {
+                if (node < N) {
+                    s += (char)('A' + node);
+                }
+                else {
+                    s += (char)('a' + (node - N));
+                }
+                s += "-";
+            }
+            s += (char)('A' + cycle[0]); // Close the cycle
+            // Find the lexicographically smallest rotation
+            string min_s = s;
+            for (size_t i = 0; i < cycle.size(); ++i) {
+                string rotated = s.substr(i * 2) + s.substr(0, i * 2);
+                if (rotated < min_s) min_s = rotated;
+            }
+            unique_cycle_strings.insert(min_s);
+        }
+
+        // Output result
+        if (unique_cycle_strings.empty()) {
+            cout << "NO\n";
+        }
+        else {
+            cout << "YES\n";
+            vector<string> cycle_strings(unique_cycle_strings.begin(), unique_cycle_strings.end());
+            sort(cycle_strings.begin(), cycle_strings.end(), [](const string& a, const string& b) {
+                if (a.size() != b.size()) return a.size() < b.size();
+                return a < b;
+                });
+
+            cout << cycle_strings[0];
+        }
+
+        if (t < T) cout << '\n'; // Blank line between test cases, not after last
+    }
+
+    return 0;
+}

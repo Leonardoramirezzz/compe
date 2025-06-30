@@ -1,0 +1,32 @@
+#include <iostream>
+#include <unordered_map>
+using namespace std;
+
+int main()
+{
+    long long N, a, b;
+    while (cin >> N && N != 0) {
+        cin >> a >> b;
+        unordered_map<long long, int> visits;
+        long long current = 0;
+        int total_steps = 0;
+
+        while (true) {
+            visits[current]++;
+            total_steps++;
+            if (visits[current] == 2) {
+                // muerto
+            }
+            else if (visits[current] == 3) {
+                break;
+            }
+            current = (a * current % N * current % N + b) % N;
+            if (total_steps > 1000000) break;
+        }
+        long long sobrevivientes = N;
+        for (const auto& p : visits) {
+            if (p.second >= 2) sobrevivientes--;
+        }
+        cout << sobrevivientes << endl;
+    }
+}

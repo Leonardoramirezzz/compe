@@ -1,0 +1,39 @@
+#include <iostream>
+#include <vector>
+#include <bitset>
+#include <string>
+using namespace std;
+
+vector<vector<int>> grafo(30);
+bitset<30> visitado, presentes;
+vector<int> orden;
+
+void dfs(int u) {
+    visitado[u] = 1;
+    for (int v : grafo[u])
+        if (!visitado[v]) dfs(v);
+    orden.push_back(u);
+}
+
+int main() {
+    string ant, act;
+    cin >> ant;
+    while (cin >> act && act != "#") {
+        for (size_t i = 0; i < min(ant.size(), act.size()); ++i)
+            if (ant[i] != act[i]) {
+                int u = ant[i] - 'A', v = act[i] - 'A';
+                presentes[u] = presentes[v] = 1;
+                grafo[u].push_back(v);
+                break;
+            }
+        ant = act;
+    }
+
+    for (int i = 0; i < 26; ++i)
+        if (presentes[i] && !visitado[i]) dfs(i);
+
+    for (int i = orden.size() - 1; i >= 0; --i)
+        cout << char(orden[i] + 'A');
+    cout << endl;
+    return 0;
+}
