@@ -45,13 +45,13 @@ int main()
     long int t, a, b, i, j, k, m, div;
     long long int sum;
     generate();
-    while(scanf("%ld",&t)==1)
+    while(scanf_s("%ld",&t)==1)
     {
         for(i=1;i<=t;i++)
         {
             div=0;
             sum=0;
-            scanf("%ld%ld%ld", &a,&b,&k);
+            scanf_s("%ld%ld%ld", &a,&b,&k);
             for(j=a;j<=b;j++)
             {
                 if(j%k==0)
